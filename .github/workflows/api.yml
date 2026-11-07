@@ -1,0 +1,62 @@
+name: api
+
+on:
+  push:
+    branches: [main]
+    paths: ['api/**', 'templates/**', '.nvmrc', '.github/workflows/api.yml']
+  pull_request:
+    paths: ['api/**', 'templates/**', '.nvmrc', '.github/workflows/api.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    services:
+      mongo:
+        image: mongo:7
+        ports: ['27017:27017']
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand(\"ping\").ok'"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+      - run: npm ci
+      - run: npx eslint "{src,test}/**/*.ts"
+      - run: npm run build
+      - run: npm test
+      - run: npm run test:scripts
+      - run: npm run templates:validate
+      # Same S3 stand-in as docker compose. Service containers can't take a command, so start it here.
+      - name: Start S3 stand-in (SeaweedFS)
+        working-directory: .
+        run: |
+          docker run -d --name s3 -p 9000:8333 -v "$PWD/docker/s3.json:/etc/seaweedfs/s3.json:ro" \
+            chrislusf/seaweedfs:3.97 server -dir=/data -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json
+          for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:9000/ && exit 0; sleep 2; done
+          docker logs s3; exit 1
+      - run: npm run test:e2e
+        env:
+          MONGODB_URI: mongodb://localhost:27017/invite_test
+      - run: npm audit --omit=dev --audit-level=high
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t invite-api:${{ github.sha }} api
+      # Sprint 0 follow-up: push to ECR + deploy to staging once AWS (OIDC role, ECR repo) exists.

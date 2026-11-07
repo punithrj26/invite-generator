@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "key": "birthday-balloons",
+  "version": 1,
+  "name": "Balloons",
+  "description": "Playful balloons on warm cream.",
+  "eventTypes": ["birthday"],
+  "tags": ["kids", "colorful"],
+  "sortOrder": 1,
+  "minRendererVersion": 1,
+  "spec": {
+    "canvas": { "width": 1080, "height": 1920 },
+    "fonts": [
+      { "family": "Pacifico", "weight": 400, "url": "fonts/pacifico/Pacifico-Regular.ttf" },
+      { "family": "Poppins", "weight": 400, "url": "fonts/poppins/Poppins-Regular.ttf" },
+      { "family": "Poppins", "weight": 600, "url": "fonts/poppins/Poppins-SemiBold.ttf" }
+    ],
+    "background": { "color": "#FFF7EC" },
+    "layers": [
+      { "id": "string-1", "type": "shape", "role": "decoration", "shape": "rect", "frame": { "x": 228, "y": 352, "w": 4, "h": 210 }, "fill": "#C9BBA8" },
+      { "id": "string-2", "type": "shape", "role": "decoration", "shape": "rect", "frame": { "x": 448, "y": 322, "w": 4, "h": 230 }, "fill": "#C9BBA8" },
+      { "id": "string-3", "type": "shape", "role": "decoration", "shape": "rect", "frame": { "x": 668, "y": 362, "w": 4, "h": 200 }, "fill": "#C9BBA8" },
+      { "id": "string-4", "type": "shape", "role": "decoration", "shape": "rect", "frame": { "x": 868, "y": 302, "w": 4, "h": 220 }, "fill": "#C9BBA8" },
+      { "id": "balloon-1", "type": "shape", "role": "decoration", "shape": "ellipse", "frame": { "x": 120, "y": 90, "w": 220, "h": 270 }, "fill": "#F06595" },
+      { "id": "balloon-2", "type": "shape", "role": "decoration", "shape": "ellipse", "frame": { "x": 330, "y": 40, "w": 240, "h": 290 }, "fill": "#FCC419" },
+      { "id": "balloon-3", "type": "shape", "role": "decoration", "shape": "ellipse", "frame": { "x": 560, "y": 100, "w": 220, "h": 270 }, "fill": "#4DABF7" },
+      { "id": "balloon-4", "type": "shape", "role": "decoration", "shape": "ellipse", "frame": { "x": 770, "y": 60, "w": 200, "h": 250 }, "fill": "#9775FA" },
+      {
+        "id": "photo", "type": "image",
+        "frame": { "x": 340, "y": 600, "w": 400, "h": 400 },
+        "src": "{{media.photoUrl}}", "fit": "cover",
+        "clip": { "shape": "circle" },
+        "border": { "width": 14, "color": "#FFFFFF" },
+        "visibleIf": "media.photoUrl"
+      },
+      {
+        "id": "title", "type": "text",
+        "frame": { "x": 80, "y": 1030, "w": 920, "h": 260 },
+        "text": "{{event.personName}} is turning {{event.age}}!",
+        "visibleIf": "event.age",
+        "style": {
+          "fontFamily": "Pacifico", "fontSize": 104, "minFontSize": 56, "color": "#C2255C",
+          "align": "center", "verticalAlign": "middle", "lineHeight": 1.15, "maxLines": 3
+        }
+      },
+      {
+        "id": "title-no-age", "type": "text",
+        "frame": { "x": 80, "y": 1030, "w": 920, "h": 260 },
+        "text": "Join us to celebrate {{event.personName}}!",
+        "visibleIf": "!event.age",
+        "style": {
+          "fontFamily": "Pacifico", "fontSize": 96, "minFontSize": 56, "color": "#C2255C",
+          "align": "center", "verticalAlign": "middle", "lineHeight": 1.15, "maxLines": 3
+        }
+      },
+      {
+        "id": "card", "type": "shape", "role": "decoration", "shape": "rect",
+        "frame": { "x": 90, "y": 1320, "w": 900, "h": 520 },
+        "radius": 40, "fill": "#FFFFFF", "stroke": { "width": 3, "color": "#F3A0B5" }
+      },
+      {
+        "id": "when", "type": "text",
+        "frame": { "x": 130, "y": 1360, "w": 820, "h": 150 },
+        "text": "{{details.date|date:EEEE, d MMMM}}\n{{details.time|time}}",
+        "style": {
+          "fontFamily": "Poppins", "fontSize": 52, "minFontSize": 36, "fontWeight": 600, "color": "#3B2F4A",
+          "align": "center", "verticalAlign": "middle", "lineHeight": 1.3, "maxLines": 2
+        }
+      },
+      {
+        "id": "where", "type": "text",
+        "frame": { "x": 130, "y": 1530, "w": 820, "h": 170 },
+        "text": "{{details.venue.name}}\n{{details.venue.address}}",
+        "style": {
+          "fontFamily": "Poppins", "fontSize": 40, "minFontSize": 28, "color": "#4A3F57",
+          "align": "center", "verticalAlign": "middle", "lineHeight": 1.3, "maxLines": 3
+        }
+      },
+      {
+        "id": "rsvp", "type": "text",
+        "frame": { "x": 130, "y": 1720, "w": 820, "h": 90 },
+        "text": "RSVP {{details.rsvp.phone}} by {{details.rsvp.deadline|date:d MMM}}",
+        "visibleIf": "details.rsvp.deadline",
+        "style": {
+          "fontFamily": "Poppins", "fontSize": 34, "minFontSize": 24, "color": "#5F5170",
+          "align": "center", "verticalAlign": "middle", "maxLines": 1
+        }
+      }
+    ]
+  }
+}

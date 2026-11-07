@@ -1,0 +1,6 @@
+{
+  "FLAVOR": "staging",
+  "API_BASE_URL": "https://api.staging.domain.com",
+  "ASSET_BASE_URL": "https://cdn.staging.domain.com",
+  "SENTRY_DSN": ""
+}

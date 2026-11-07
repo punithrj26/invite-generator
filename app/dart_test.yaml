@@ -1,0 +1,3 @@
+# Golden tests compare pixels and are platform-sensitive: CI runs them on macOS only.
+tags:
+  golden:

@@ -1,0 +1,76 @@
+name: app
+
+on:
+  push:
+    branches: [main]
+    paths: ['app/**', 'templates/**', '.github/workflows/app.yml'] # tests render templates/
+  pull_request:
+    paths: ['app/**', 'templates/**', '.github/workflows/app.yml'] # tests render templates/
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: 3.44.7
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed lib test
+      - run: flutter analyze
+      - run: flutter test --exclude-tags golden # goldens rasterise per-OS: macOS job below
+      - run: flutter build web --release --dart-define-from-file=config/staging.json
+      # Follow-up once AWS exists: s3 sync + CloudFront invalidation.
+
+  android:
+    needs: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21 # matches local Android Studio JBR; Gradle 9.1 needs ≥ 17
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      # Release build: catches manifest-merge / minSdk failures that debug builds can hide.
+      # Signed with the debug key until store signing exists (fastlane, on tags).
+      - run: flutter build apk --release --dart-define-from-file=config/staging.json
+
+  ios:
+    needs: test
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter test --tags golden
+      # Simulator build needs no code signing; device/TestFlight builds come with fastlane.
+      - run: flutter build ios --simulator --debug --dart-define-from-file=config/staging.json

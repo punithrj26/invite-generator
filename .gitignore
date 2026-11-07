@@ -1,0 +1,91 @@
+# ============================================================
+# Invitara Monorepo - Root Git Ignore
+# Flutter-specific rules live in app/.gitignore
+# ============================================================
+
+# OS
+.DS_Store
+._*
+Thumbs.db
+desktop.ini
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.key
+*.keystore
+*.jks
+*.mobileprovision
+key.properties
+*.local.json
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Claude Code
+# Shared project skills should remain tracked.
+.claude/settings.local.json
+.claude/worktrees/
+
+# Node.js / NestJS
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.eslintcache
+.nyc_output/
+
+# Package managers
+.npm/
+.pnpm-store/
+*.tgz
+
+# Flutter / Dart
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+
+# Android / Gradle
+.gradle/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
+# iOS / Xcode
+DerivedData/
+Pods/
+*.xcuserstate
+*.xccheckout
+*.moved-aside
+*.hmap
+
+# Build artifacts
+*.app
+*.dSYM/
+*.ipa
+*.apk
+*.aab
+
+# Temporary files
+*.tmp
+*.temp
+*.bak

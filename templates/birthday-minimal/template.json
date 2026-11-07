@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "key": "birthday-minimal",
+  "version": 1,
+  "name": "Classic Gold",
+  "description": "Quiet, elegant and timeless.",
+  "eventTypes": ["birthday"],
+  "tags": ["elegant", "minimal"],
+  "sortOrder": 3,
+  "minRendererVersion": 1,
+  "spec": {
+    "canvas": { "width": 1080, "height": 1920 },
+    "fonts": [
+      { "family": "Pacifico", "weight": 400, "url": "fonts/pacifico/Pacifico-Regular.ttf" },
+      { "family": "Poppins", "weight": 400, "url": "fonts/poppins/Poppins-Regular.ttf" },
+      { "family": "Poppins", "weight": 600, "url": "fonts/poppins/Poppins-SemiBold.ttf" }
+    ],
+    "background": { "color": "#FAF7F2" },
+    "layers": [
+      { "id": "frame-outer", "type": "shape", "role": "decoration", "shape": "rect", "frame": { "x": 50, "y": 50, "w": 980, "h": 1820 }, "stroke": { "width": 3, "color": "#B08D57" } },
+      { "id": "frame-inner", "type": "shape", "role": "decoration", "shape": "rect", "frame": { "x": 80, "y": 80, "w": 920, "h": 1760 }, "stroke": { "width": 1, "color": "#B08D57" } },
+      {
+        "id": "kicker", "type": "text",
+        "frame": { "x": 100, "y": 250, "w": 880, "h": 80 },
+        "text": "You're invited",
+        "style": {
+          "fontFamily": "Poppins", "fontSize": 34, "fontWeight": 600, "color": "#7A5F30",
+          "align": "center", "verticalAlign": "middle", "letterSpacing": 8, "transform": "uppercase", "maxLines": 1
+        }
+      },
+      {
+        "id": "intro", "type": "text",
+        "frame": { "x": 100, "y": 350, "w": 880, "h": 70 },
+        "text": "to celebrate",
+        "style": {
+          "fontFamily": "Poppins", "fontSize": 32, "color": "#4A443F",
+          "align": "center", "verticalAlign": "middle", "maxLines": 1
+        }
+      },
+      {
+        "id": "name", "type": "text",
+        "frame": { "x": 130, "y": 450, "w": 820, "h": 270 },
+        "text": "{{event.personName}}",
+        "style": {
+          "fontFamily": "Pacifico", "fontSize": 124, "minFontSize": 64, "color": "#2F2A26",
+          "align": "center", "verticalAlign": "middle", "lineHeight": 1.15, "maxLines": 2
+        }
+      },
+      {
+        "id": "age", "type": "text",
+        "frame": { "x": 100, "y": 740, "w": 880, "h": 80 },
+        "text": "turning {{event.age}}",
+        "visibleIf": "event.age",
+        "style": {
+          "fontFamily": "Poppins", "fontSize": 44, "color": "#4A443F",
+          "align": "center", "verticalAlign": "middle", "maxLines": 1
+        }
+      },
+      {
+        "id": "photo", "type": "image",
+        "frame": { "x": 390, "y": 860, "w": 300, "h": 300 },
+        "src": "{{media.photoUrl}}", "fit": "cover",
+        "clip": { "shape": "circle" },
+        "border": { "width": 6, "color": "#B08D57" },
+        "visibleIf": "media.photoUrl"
+      },
+      { "id": "divider", "type": "shape", "role": "decoration", "shape": "rect", "frame": { "x": 440, "y": 1210, "w": 200, "h": 2 }, "fill": "#B08D57" },
+      {
+        "id": "when", "type": "text",
+        "frame": { "x": 100, "y": 1250, "w": 880, "h": 160 },
+        "text": "{{details.date|date:EEEE, d MMMM}}\n{{details.time|time}}",
+        "style": {
+          "fontFamily": "Poppins", "fontSize": 50, "minFontSize": 34, "fontWeight": 600, "color": "#2F2A26",
+          "align": "center", "verticalAlign": "middle", "lineHeight": 1.3, "maxLines": 2
+        }
+      },
+      {
+        "id": "where", "type": "text",
+        "frame": { "x": 100, "y": 1430, "w": 880, "h": 180 },
+        "text": "{{details.venue.name}}\n{{details.venue.address}}",
+        "style": {
+          "fontFamily": "Poppins", "fontSize": 38, "minFontSize": 28, "color": "#4A443F",
+          "align": "center", "verticalAlign": "middle", "lineHeight": 1.3, "maxLines": 3
+        }
+      },
+      {
+        "id": "host", "type": "text",
+        "frame": { "x": 100, "y": 1630, "w": 880, "h": 70 },
+        "text": "Hosted by {{details.hostName}}",
+        "style": {
+          "fontFamily": "Poppins", "fontSize": 32, "minFontSize": 24, "color": "#4A443F",
+          "align": "center", "verticalAlign": "middle", "maxLines": 1
+        }
+      },
+      {
+        "id": "rsvp", "type": "text",
+        "frame": { "x": 100, "y": 1710, "w": 880, "h": 70 },
+        "text": "RSVP {{details.rsvp.phone}} by {{details.rsvp.deadline|date:d MMM}}",
+        "visibleIf": "details.rsvp.deadline",
+        "style": {
+          "fontFamily": "Poppins", "fontSize": 30, "minFontSize": 22, "color": "#7A5F30",
+          "align": "center", "verticalAlign": "middle", "maxLines": 1
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "FLAVOR": "prod",
+  "API_BASE_URL": "https://api.domain.com",
+  "ASSET_BASE_URL": "https://cdn.domain.com",
+  "SENTRY_DSN": ""
+}

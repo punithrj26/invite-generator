@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://invite.domain.com/schemas/template.v1.json",
+  "title": "Invitation template (schema v1) — see docs/03-template-engine.md",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "key", "version", "name", "eventTypes", "minRendererVersion", "spec"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "key": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "version": { "type": "integer", "minimum": 1 },
+    "name": { "type": "string", "minLength": 1, "maxLength": 60 },
+    "description": { "type": "string", "maxLength": 300 },
+    "eventTypes": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": { "enum": ["birthday", "wedding", "babyShower", "engagement", "housewarming", "corporate"] }
+    },
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "isPremium": { "type": "boolean" },
+    "sortOrder": { "type": "integer", "minimum": 0 },
+    "minRendererVersion": { "type": "integer", "minimum": 1 },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canvas", "fonts", "layers"],
+      "properties": {
+        "canvas": {
+          "type": "object", "additionalProperties": false, "required": ["width", "height"],
+          "properties": {
+            "width": { "type": "integer", "minimum": 100, "maximum": 4096 },
+            "height": { "type": "integer", "minimum": 100, "maximum": 4096 }
+          }
+        },
+        "fonts": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["family", "url"],
+            "properties": {
+              "family": { "type": "string", "minLength": 1 },
+              "weight": { "type": "integer", "minimum": 100, "maximum": 900, "multipleOf": 100 },
+              "style": { "enum": ["normal", "italic"] },
+              "url": { "$ref": "#/$defs/url" }
+            }
+          }
+        },
+        "background": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "color": { "$ref": "#/$defs/color" },
+            "image": {
+              "type": "object", "additionalProperties": false, "required": ["src"],
+              "properties": { "src": { "$ref": "#/$defs/source" }, "fit": { "$ref": "#/$defs/fit" } }
+            }
+          }
+        },
+        "layers": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/layer" } }
+      }
+    }
+  },
+  "$defs": {
+    "color": { "type": "string", "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$" },
+    "assetPath": { "type": "string", "pattern": "^(?!.*\\.\\.)[A-Za-z0-9][A-Za-z0-9/_.-]*\\.(ttf|otf|webp|png|jpe?g)$" },
+    "url": {
+      "description": "Font file: absolute https URL, or a path relative to templates/ (the seed script prefixes ASSET_BASE_URL).",
+      "anyOf": [{ "type": "string", "pattern": "^https://\\S+$" }, { "$ref": "#/$defs/assetPath" }]
+    },
+    "source": {
+      "description": "Image: absolute https URL, a relative asset path, or exactly one {{binding}} (nothing else around it).",
+      "anyOf": [
+        { "type": "string", "pattern": "^https://\\S+$" },
+        { "type": "string", "pattern": "^\\{\\{\\s*[A-Za-z0-9_.]+\\s*\\}\\}$" },
+        { "$ref": "#/$defs/assetPath" }
+      ]
+    },
+    "fit": { "enum": ["cover", "contain", "fill"] },
+    "binding": { "type": "string", "pattern": "^!?[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*$" },
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "rotation": { "type": "number", "minimum": -360, "maximum": 360 },
+    "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+    "role": { "enum": ["content", "decoration"] },
+    "frame": {
+      "type": "object", "additionalProperties": false, "required": ["x", "y", "w", "h"],
+      "properties": {
+        "x": { "type": "number" }, "y": { "type": "number" },
+        "w": { "type": "number", "exclusiveMinimum": 0 }, "h": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "stroke": {
+      "type": "object", "additionalProperties": false, "required": ["width", "color"],
+      "properties": {
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "color": { "$ref": "#/$defs/color" },
+        "dash": { "type": "array", "items": { "type": "number", "exclusiveMinimum": 0 }, "minItems": 2, "maxItems": 2 }
+      }
+    },
+    "layer": {
+      "type": "object",
+      "required": ["type"],
+      "discriminator": { "propertyName": "type" },
+      "oneOf": [
+        { "$ref": "#/$defs/textLayer" },
+        { "$ref": "#/$defs/imageLayer" },
+        { "$ref": "#/$defs/shapeLayer" }
+      ]
+    },
+    "textLayer": {
+      "type": "object", "additionalProperties": false, "required": ["id", "type", "frame", "text", "style"],
+      "properties": {
+        "type": { "const": "text" },
+        "id": { "$ref": "#/$defs/id" }, "frame": { "$ref": "#/$defs/frame" },
+        "rotation": { "$ref": "#/$defs/rotation" }, "opacity": { "$ref": "#/$defs/opacity" },
+        "role": { "$ref": "#/$defs/role" }, "visibleIf": { "$ref": "#/$defs/binding" },
+        "text": { "type": "string", "minLength": 1 },
+        "style": {
+          "type": "object", "additionalProperties": false, "required": ["fontFamily", "fontSize"],
+          "properties": {
+            "fontFamily": { "type": "string" },
+            "fontSize": { "type": "number", "exclusiveMinimum": 0 },
+            "minFontSize": { "type": "number", "exclusiveMinimum": 0 },
+            "fontWeight": { "type": "integer", "minimum": 100, "maximum": 900, "multipleOf": 100 },
+            "italic": { "type": "boolean" },
+            "color": { "$ref": "#/$defs/color" },
+            "align": { "enum": ["left", "center", "right", "justify"] },
+            "verticalAlign": { "enum": ["top", "middle", "bottom"] },
+            "lineHeight": { "type": "number", "exclusiveMinimum": 0 },
+            "letterSpacing": { "type": "number" },
+            "maxLines": { "type": "integer", "minimum": 1 },
+            "transform": { "enum": ["none", "uppercase", "lowercase"] },
+            "shadow": {
+              "type": "object", "additionalProperties": false, "required": ["color"],
+              "properties": {
+                "color": { "$ref": "#/$defs/color" },
+                "dx": { "type": "number" }, "dy": { "type": "number" },
+                "blur": { "type": "number", "minimum": 0 }
+              }
+            },
+            "stroke": { "$ref": "#/$defs/stroke" }
+          }
+        }
+      }
+    },
+    "imageLayer": {
+      "type": "object", "additionalProperties": false, "required": ["id", "type", "frame", "src"],
+      "properties": {
+        "type": { "const": "image" },
+        "id": { "$ref": "#/$defs/id" }, "frame": { "$ref": "#/$defs/frame" },
+        "rotation": { "$ref": "#/$defs/rotation" }, "opacity": { "$ref": "#/$defs/opacity" },
+        "role": { "$ref": "#/$defs/role" }, "visibleIf": { "$ref": "#/$defs/binding" },
+        "src": { "$ref": "#/$defs/source" },
+        "fit": { "$ref": "#/$defs/fit" },
+        "clip": {
+          "type": "object", "additionalProperties": false, "required": ["shape"],
+          "properties": { "shape": { "enum": ["rect", "circle"] }, "radius": { "type": "number", "minimum": 0 } }
+        },
+        "border": { "$ref": "#/$defs/stroke" }
+      }
+    },
+    "shapeLayer": {
+      "type": "object", "additionalProperties": false, "required": ["id", "type", "frame", "shape"],
+      "properties": {
+        "type": { "const": "shape" },
+        "id": { "$ref": "#/$defs/id" }, "frame": { "$ref": "#/$defs/frame" },
+        "rotation": { "$ref": "#/$defs/rotation" }, "opacity": { "$ref": "#/$defs/opacity" },
+        "role": { "$ref": "#/$defs/role" }, "visibleIf": { "$ref": "#/$defs/binding" },
+        "shape": { "enum": ["rect", "ellipse", "line"] },
+        "fill": { "$ref": "#/$defs/color" },
+        "radius": { "type": "number", "minimum": 0 },
+        "stroke": { "$ref": "#/$defs/stroke" }
+      }
+    }
+  }
+}

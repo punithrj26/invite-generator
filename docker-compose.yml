@@ -1,0 +1,52 @@
+# Local dev stack: `docker compose up --build` → API on http://localhost:3000/health
+services:
+  mongo:
+    image: mongo:7
+    ports: ["27018:27017"] # 27018 on the host: avoids clashing with a native mongod on 27017
+    volumes: [mongo-data:/data/db]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./api
+    ports: ["3000:3000"]
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      MONGODB_URI: mongodb://mongo:27017/invite
+      WEB_APP_ORIGIN: http://localhost:8080
+      JWT_ACCESS_SECRET: dev-only-change-me-0123456789abcdefghijklmnop # local compose only, never a real secret
+      ASSET_BASE_URL: http://localhost:8081
+      S3_ENDPOINT: http://s3:8333
+      MEDIA_BASE_URL: http://localhost:9000/invite-media
+      AWS_ACCESS_KEY_ID: s3-dev # local stand-in only (docker/s3.json), never a real credential
+      AWS_SECRET_ACCESS_KEY: s3-dev-only-secret
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  # Local stand-in for the CDN: template fonts/images from ./templates with CORS (docker/assets.conf).
+  assets:
+    image: nginx:1.27-alpine
+    ports: ["8081:80"]
+    volumes:
+      - ./templates:/srv/templates:ro
+      - ./docker/assets.conf:/etc/nginx/conf.d/default.conf:ro
+
+  # Local stand-in for the S3 media bucket (S3-compatible, supports presigned POST). docker/s3.json: one dev
+  # identity plus anonymous read on the bucket (the CDN's job in AWS). Uploads from host clients need the API on
+  # the host (S3_ENDPOINT=http://localhost:9000): presigned URLs carry the endpoint the API was configured with.
+  s3:
+    image: chrislusf/seaweedfs:3.97
+    command: server -dir=/data -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json
+    ports: ["9000:8333"]
+    volumes:
+      - s3-data:/data
+      - ./docker/s3.json:/etc/seaweedfs/s3.json:ro
+
+volumes:
+  mongo-data:
+  s3-data:
